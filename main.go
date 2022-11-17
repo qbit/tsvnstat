@@ -16,11 +16,17 @@ import (
 	"tailscale.com/tsnet"
 )
 
-//go:embed generate_images.sh
-var genScript []byte
-
 //go:embed style.css
 var style string
+
+func runCmd(cmd string, dir string, args ...string) {
+	genCmd := exec.Command(cmd, args...)
+	genCmd.Dir = dir
+	out, err := genCmd.Output()
+	if err != nil {
+		log.Println(string(out), err)
+	}
+}
 
 func main() {
 	tmpDir, err := os.MkdirTemp("", "tsvnstat")
@@ -30,29 +36,10 @@ func main() {
 
 	defer os.RemoveAll(tmpDir)
 
-	tmpFile, err := os.CreateTemp("", "generate_images.sh")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer os.Remove(tmpFile.Name())
-
-	if _, err := tmpFile.Write(genScript); err != nil {
-		log.Fatal(err)
-	}
-	if err := tmpFile.Close(); err != nil {
-		log.Fatal(err)
-	}
-
-	err = os.Chmod(tmpFile.Name(), 0700)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	name := flag.String("name", "", "name of service")
 	dir := flag.String("dir", tmpDir, "directory containing vnstat images")
 	key := flag.String("key", "", "path to file containing the api key")
-	shell := flag.String("sh", "/bin/sh", "path to interpreter")
+	vnstati := flag.String("vnstati", "/bin/vnstati", "path to vnstati")
 	flag.Parse()
 
 	s := &tsnet.Server{
@@ -80,26 +67,24 @@ func main() {
 
 	go func() {
 		for {
-			log.Printf("running %q in %q", tmpFile.Name(), tmpDir)
-
 			ifaces, err := net.Interfaces()
 			if err != nil {
 				log.Fatal("can't get interfaces...", err)
 			}
 
-			cmd := []string{tmpFile.Name()}
-			for _, intf := range ifaces {
-				cmd = append(cmd, intf.Name)
+			for _, iface := range ifaces {
+				if iface.Flags&net.FlagUp == 0 {
+					continue
+				}
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "-s", "-o", fmt.Sprintf("%s-s.png", iface.Name), iface.Name)
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "--fivegraph", "576", "218", "-o", fmt.Sprintf("%s-5g.png", iface.Name), iface.Name)
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "-hg", "-o", fmt.Sprintf("%s-hg.png", iface.Name), iface.Name)
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "-h", "24", "-o", fmt.Sprintf("%s-h.png", iface.Name), iface.Name)
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "-d", "30", "-o", fmt.Sprintf("%s-d.png", iface.Name), iface.Name)
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "-t", "10", "-o", fmt.Sprintf("%s-t.png", iface.Name), iface.Name)
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "-m", "12", "-o", fmt.Sprintf("%s-m.png", iface.Name), iface.Name)
+				runCmd(*vnstati, *dir, "--style", "1", "-L", "-y", "5", "-o", fmt.Sprintf("%s-y.png", iface.Name), iface.Name)
 			}
-
-			genCmd := exec.Command(*shell, cmd...)
-			genCmd.Dir = *dir
-			out, err := genCmd.Output()
-			if err != nil {
-				log.Fatal("can't run generation script", err)
-			}
-
-			log.Println(string(out))
 
 			time.Sleep(5 * time.Minute)
 		}
