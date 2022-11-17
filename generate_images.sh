@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -x
+
 for i in $@; do
 	vnstati --style 1 -L -s -o ${i}-s.png $i
 	vnstati --style 1 -L --fivegraph 576 218 -o ${i}-5g.png $i

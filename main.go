@@ -52,6 +52,7 @@ func main() {
 	name := flag.String("name", "", "name of service")
 	dir := flag.String("dir", tmpDir, "directory containing vnstat images")
 	key := flag.String("key", "", "path to file containing the api key")
+	shell := flag.String("sh", "/bin/sh", "path to interpreter")
 	flag.Parse()
 
 	s := &tsnet.Server{
@@ -79,7 +80,6 @@ func main() {
 
 	go func() {
 		for {
-			time.Sleep(10 * time.Second)
 			log.Printf("running %q in %q", tmpFile.Name(), tmpDir)
 
 			ifaces, err := net.Interfaces()
@@ -87,12 +87,12 @@ func main() {
 				log.Fatal("can't get interfaces...", err)
 			}
 
-			var ifNames []string
+			cmd := []string{tmpFile.Name()}
 			for _, intf := range ifaces {
-				ifNames = append(ifNames, intf.Name)
+				cmd = append(cmd, intf.Name)
 			}
 
-			genCmd := exec.Command(tmpFile.Name(), ifNames...)
+			genCmd := exec.Command(*shell, cmd...)
 			genCmd.Dir = *dir
 			out, err := genCmd.Output()
 			if err != nil {
