@@ -91,10 +91,13 @@ func main() {
 
 			genCmd := exec.Command(tmpFile.Name(), ifNames...)
 			genCmd.Dir = *dir
-			_, err = genCmd.Output()
+			out, err := genCmd.Output()
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			log.Println(out)
+
 			time.Sleep(5 * time.Minute)
 		}
 	}()
