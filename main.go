@@ -51,10 +51,17 @@ func main() {
 
 	name := flag.String("name", "", "name of service")
 	dir := flag.String("dir", tmpDir, "directory containing vnstat images")
+	key := flag.String("key", "", "path to file containing the api key")
 	flag.Parse()
+
+	keyData, err := os.ReadFile(*key)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	s := &tsnet.Server{
 		Hostname: *name,
+		AuthKey:  string(keyData),
 	}
 
 	ln, err := s.Listen("tcp", ":80")
