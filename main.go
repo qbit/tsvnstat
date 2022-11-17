@@ -54,14 +54,16 @@ func main() {
 	key := flag.String("key", "", "path to file containing the api key")
 	flag.Parse()
 
-	keyData, err := os.ReadFile(*key)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	s := &tsnet.Server{
 		Hostname: *name,
-		AuthKey:  string(keyData),
+	}
+
+	if *key != "" {
+		keyData, err := os.ReadFile(*key)
+		if err != nil {
+			log.Fatal(err)
+		}
+		s.AuthKey = string(keyData)
 	}
 
 	ln, err := s.Listen("tcp", ":80")
@@ -77,11 +79,12 @@ func main() {
 
 	go func() {
 		for {
+			time.Sleep(10 * time.Second)
 			log.Printf("running %q in %q", tmpFile.Name(), tmpDir)
 
 			ifaces, err := net.Interfaces()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("can't get interfaces...", err)
 			}
 
 			var ifNames []string
@@ -93,10 +96,10 @@ func main() {
 			genCmd.Dir = *dir
 			out, err := genCmd.Output()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal("can't run generation script", err)
 			}
 
-			log.Println(out)
+			log.Println(string(out))
 
 			time.Sleep(5 * time.Minute)
 		}
@@ -108,7 +111,7 @@ func main() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fileServer.ServeHTTP(w, r)
 	})
-	mux.HandleFunc("/index.html", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
 		images, err := os.ReadDir(*dir)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
@@ -146,7 +149,7 @@ func main() {
 				fmt.Fprintf(w, "<img src=%q /><br />", in)
 			}
 		}
-	}))
+	})
 
 	hs := &http.Server{
 		Handler: mux,
