@@ -15,7 +15,7 @@
         in {
           tsvnstat = pkgs.buildGoModule {
             pname = "tsvnstat";
-            version = "v0.0.6";
+            version = "v0.0.7";
             src = ./.;
 
             vendorSha256 = "sha256-RNhu1gQ62Hg8Fhiw9uIS+b4YaAHtZMaqbelMKv+oZjM=";
