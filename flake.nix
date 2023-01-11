@@ -15,10 +15,10 @@
         in {
           tsvnstat = pkgs.buildGoModule {
             pname = "tsvnstat";
-            version = "v0.0.9";
+            version = "v0.0.10";
             src = ./.;
 
-            vendorSha256 = "sha256-kneXJLcNfKSvXpPmUU3Y7oFcVlknQ9Dsjd4Rq4bJrGo=";
+            vendorSha256 = "sha256-bOiHR6UPma06sf2WU8KqxIp8vOY8xoUuNcLhweriwYM=";
             proxyVendor = true;
           };
         });
