@@ -1,7 +1,7 @@
 {
   description = "tsvnstat: a tailscale aware vmcstat server";
 
-  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs";
 
   outputs = { self, nixpkgs }:
     let
@@ -13,12 +13,12 @@
       packages = forAllSystems (system:
         let pkgs = nixpkgsFor.${system};
         in {
-          tsvnstat = pkgs.buildGoModule {
+          tsvnstat = pkgs.buildGo121Module {
             pname = "tsvnstat";
-            version = "v0.0.11";
+            version = "v0.0.12";
             src = ./.;
 
-            vendorSha256 = "sha256-QcuL7qjNTloLBYnT2pZtYDZlj2/qm8sNS7EUVBbCp7U=";
+            vendorSha256 = "sha256-x/5iPT98NpUsL8SseIO8t74JDMUIXNliT09KKKUiB4I=";
             proxyVendor = true;
           };
         });
@@ -32,7 +32,7 @@
               PS1='\u@\h:\@; '
               echo "Go `${pkgs.go}/bin/go version`"
             '';
-            nativeBuildInputs = with pkgs; [ git go gopls go-tools ];
+            nativeBuildInputs = with pkgs; [ git go_1_21 gopls go-tools ];
           };
         });
     };
