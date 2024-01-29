@@ -15,10 +15,10 @@
         in {
           tsvnstat = pkgs.buildGo121Module {
             pname = "tsvnstat";
-            version = "v0.0.13";
+            version = "v0.0.14";
             src = ./.;
 
-            vendorHash = "sha256-YNrE+JaoHjkqEVdOubgOiDKH332zY0Njy8JOYxMRoKw=";
+            vendorHash = "sha256-96EtvRK7DRPF7y2iG8dtBCOjk3oRnPrQhmMf8c0WpqI=";
             proxyVendor = true;
           };
         });
@@ -30,6 +30,7 @@
           default = pkgs.mkShell {
             shellHook = ''
               PS1='\u@\h:\@; '
+              nix run github:qbit/xin#flake-warn
               echo "Go `${pkgs.go}/bin/go version`"
             '';
             nativeBuildInputs = with pkgs; [ git go_1_21 gopls go-tools ];
