@@ -13,12 +13,12 @@
       packages = forAllSystems (system:
         let pkgs = nixpkgsFor.${system};
         in {
-          tsvnstat = pkgs.buildGo121Module {
+          tsvnstat = pkgs.buildGoModule {
             pname = "tsvnstat";
-            version = "v0.0.14";
+            version = "v0.0.15";
             src = ./.;
 
-            vendorHash = "sha256-96EtvRK7DRPF7y2iG8dtBCOjk3oRnPrQhmMf8c0WpqI=";
+            vendorHash = "sha256-Rgyv2KmWpEEyQTXau/lOKyeMLyboPDBFLBFY9cq4hNU=";
             proxyVendor = true;
           };
         });

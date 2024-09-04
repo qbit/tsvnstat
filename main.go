@@ -42,7 +42,7 @@ func main() {
 	vnstati := flag.String("vnstati", "/bin/vnstati", "path to vnstati")
 	flag.Parse()
 
-	s := &tsnet.Server{
+	tsServer := &tsnet.Server{
 		Hostname: *name,
 	}
 
@@ -51,14 +51,14 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		s.AuthKey = string(keyData)
+		tsServer.AuthKey = string(keyData)
 	}
 
-	ln, err := s.Listen("tcp", ":80")
+	tsln, err := tsServer.Listen("tcp", ":80")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer ln.Close()
+	defer tsln.Close()
 
 	host, err := os.Hostname()
 	if err != nil {
@@ -140,5 +140,5 @@ func main() {
 		Handler: mux,
 	}
 
-	log.Panic(hs.Serve(ln))
+	log.Panic(hs.Serve(tsln))
 }
